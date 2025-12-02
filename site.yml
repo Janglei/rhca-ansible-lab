@@ -3,9 +3,12 @@
   hosts: all
   become: yes
 
-  # 在这里定义变量，优先级高于 roles/defaults
-  #vars:
-  #  maintenance_mode: true
+  # ansible会自动加载group_vars下的所有文件（包括加密的）
+  tasks:
+    - name: "[测试]打印加密变量（仅供测试）"
+      debug:
+        msg: "解密后的密码是：{{ secret_password }}"
 
   roles:
+    - system_init
     - nginx

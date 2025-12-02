@@ -1,0 +1,20 @@
+---
+- name: 批量创建系统用户
+  user:
+    name: "{{ item }}"
+    state: present
+    # 考点：Vault 里的密码是明文，必须用 filter 转成 Hash 才能给 user 模块用
+    password: "{{ secret_password | password_hash('sha512') }}"
+  loop:
+    - dev_user
+    - ops_user
+
+- name: "[Web组专用] 创建数据目录"
+  file:
+    path: /opt/web_data
+    state: directory
+    mode: '0755'
+    owner: dev_user
+    group: dev_user
+  # 考点：只在 web_servers 组生效
+  when: "'web_servers' in group_names"
