@@ -1,0 +1,30 @@
+---
+- name: 确保nginx已安装
+  dnf:
+    name: nginx
+    state: present
+- name: 允许HTTP流量通过防火墙
+  firewalld:
+    service: http
+    permanent: true
+    state: enabled
+    immediate: true
+
+#- name: 修改首页内容
+# copy: 
+#    content: "<h1>This is deployed by Ansible Role!</h1>"
+#    dest: /usr/share/nginx/html/index.html
+#  notify: 重启nginx服务
+
+- name: 使用模板生成动态首页
+  template: 
+    src: index.j2
+    dest: /usr/share/nginx/html/index.html
+  notify: 重启nginx服务
+
+- name: 确保nginx已启动并开机自启
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
