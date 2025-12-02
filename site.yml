@@ -2,5 +2,10 @@
 - name: 全局web服务器
   hosts: all
   become: yes
+
+  # 在这里定义变量，优先级高于 roles/defaults
+  #vars:
+  #  maintenance_mode: true
+
   roles:
     - nginx

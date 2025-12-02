@@ -1,8 +1,14 @@
 ---
-- name: 确保nginx已安装
+- name: 使用循环批量安装软件
   dnf:
-    name: nginx
+    name: " {{ item }}"
     state: present
+  loop:
+    - nginx
+    - git
+    - tree
+    - curl
+
 - name: 允许HTTP流量通过防火墙
   firewalld:
     service: http
@@ -10,16 +16,20 @@
     state: enabled
     immediate: true
 
-#- name: 修改首页内容
-# copy: 
-#    content: "<h1>This is deployed by Ansible Role!</h1>"
-#    dest: /usr/share/nginx/html/index.html
-#  notify: 重启nginx服务
-
-- name: 使用模板生成动态首页
-  template: 
+#情况A：正常模式（部署动态网页）
+- name: "[正常模式]部署动态首页"
+  template:
     src: index.j2
     dest: /usr/share/nginx/html/index.html
+  when: maintenance_mode == false # <--- 只有当变量为 false 时才执行
+  notify: 重启nginx服务
+
+#情况B：维护模式（部署维护通告）
+- name: "[维护模式]部署维护页面"
+  copy:
+    content: "<h1>System Maintenance</h1><p>We will be back soon.</p>"
+    dest: /usr/share/nginx/html/index.html
+  when: maintenance_mode == true # <--- 只有当变量为 true 时才执行
   notify: 重启nginx服务
 
 - name: 确保nginx已启动并开机自启
